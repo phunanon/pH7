@@ -1,0 +1,13 @@
+{
+  "include": ["./*"],
+  "exclude": [""],
+  "compilerOptions": {
+    "target": "es2016",
+    "module": "commonjs",
+    "lib": ["ES2016", "DOM"],
+    "outDir": "./",
+    "rootDir": "./",
+    "sourceMap": true,
+    "strict": true,
+  }
+}
