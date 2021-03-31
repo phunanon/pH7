@@ -3,6 +3,12 @@ type State = any;
 type DomEvent = (state: State) => State;
 type View = (state: State) => any[];
 
+const isArr = Array.isArray;
+const isStr = (x: any): x is string => typeof x == "string";
+const isObj = (x: any): x is object => typeof x == "object";
+const isEvt = (x: any): x is DomEvent => typeof x == "function";
+const isUnd = (x: any): x is undefined => typeof x == "undefined";
+
 function hash (s: string): number {
   for (var i = 0, h = 9; i < s.length; )
     h = Math.imul(h ^ s.charCodeAt(i++), 9 ** 9);
@@ -32,24 +38,20 @@ function makeEvent (handler: DomEvent): string {
   return `doEvent(${key})`;
 }
 
-function toHtml (node: any): string {
-  if (typeof node == "undefined") {
-    return "";
-  }
-  return Array.isArray(node) ? arrayToHtml(node) : node.toString();
-}
+const toHtml = (node: any): string =>
+  isUnd(node) ? "" : isArr(node) ? arrayToHtml(node) : node.toString();
 
 function arrayToHtml (node: any[]): string {
   const [head] = node.splice(0, 1);
-  if (Array.isArray(head)) {
+  if (isArr(head)) {
     return arrayToHtml(head) + node.map(toHtml).join("");
   }
-  if (typeof head != "string") {
+  if (!isStr(head)) {
     console.log(`Bad head: ${head}`);
     return "";
   }
   let elAttrs = "";
-  if (node.length && typeof node[0] == "object" && !Array.isArray(node[0])) {
+  if (node.length && isObj(node[0]) && !isArr(node[0])) {
     elAttrs = attrs(node[0]);
     node.shift();
   }
@@ -60,5 +62,5 @@ function arrayToHtml (node: any[]): string {
           </${tag}>`;
 }
 
-const attr = (attr: string | DomEvent): string => typeof attr == "function" ? makeEvent(attr) : attr;
+const attr = (attr: string | DomEvent): string => isEvt(attr) ? makeEvent(attr) : attr;
 const attrs = (node: any): string => Object.keys(node).map(a => ` ${a}="${attr(node[a])}"`).join("");

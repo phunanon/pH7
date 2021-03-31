@@ -5,9 +5,10 @@
     <script>
 function main () {
   mount(document.body,
-    ({n}) => ["button",
-              {onclick: ({n}) => ({n: n + 1})},
-              n],
+    ({n}) => [
+      ["button", {onclick: ({n}) => ({n: n + 1})}, n],
+      ["p", "I never change."],
+    ],
     {n: 0});
 }
     </script>
