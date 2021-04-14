@@ -15,7 +15,7 @@ function mount(component: HTMLElement, view: View, state: any): void {
 
 function update(): void {
   _handlers.clear();
-  _mount.innerHTML = html(_view({ ..._state }));
+  _mount.innerHTML = html(_view(_state));
 }
 
 function doEvent(handlerKey: number): void {

@@ -2,9 +2,9 @@
   "include": ["./*"],
   "exclude": [""],
   "compilerOptions": {
-    "target": "es2016",
+    "target": "esNext",
     "module": "commonjs",
-    "lib": ["ES2016", "DOM"],
+    "lib": ["ESNext", "DOM"],
     "outDir": "./",
     "rootDir": "./",
     "sourceMap": true,
