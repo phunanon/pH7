@@ -1,31 +1,28 @@
 type DomEvent = (state: any) => any;
-type View = (state: any) => any[];
 
 const isObj = (x: any): x is object =>
   Object.prototype.toString.call(x) == "[object Object]";
 const isEvt = (x: any): x is DomEvent => typeof x == "function";
 
-let _mount: HTMLElement, _view: View, _state: {};
-const _handlers = new Map<number, DomEvent>();
+let _mount: HTMLElement, _view: (state: any) => any[];
+const _evts = new Map<number, DomEvent>();
+const store = (state?: any): any =>
+  state
+    ? [localStorage.setItem("pH7", JSON.stringify(state)), update()]
+    : JSON.parse(localStorage.getItem("pH7") ?? "null");
 
-function mount(component: HTMLElement, view: View, state: any): void {
-  [_mount, _view, _state] = [component, view, state];
-  update();
-}
+const mount = (component: HTMLElement, view: typeof _view, state: any) => {
+  [_mount, _view] = [component, view];
+  store(store() || state);
+};
 
-function update(): void {
-  _handlers.clear();
-  _mount.innerHTML = html(_view(_state));
-}
+const update = () => [_evts.clear(), (_mount.innerHTML = html(_view(store())))];
 
-function doEvent(handlerKey: number): void {
-  _state = { ..._state, ..._handlers.get(handlerKey)?.(_state) };
-  update();
-}
+const evt = (key: number) => store({ ...store(), ..._evts.get(key)!(store()) });
 
-const html = (x: any): string => (Array.isArray(x) ? arrHtml(x) : x.toString());
+const html = (x: any) => (Array.isArray(x) ? arrHtml(x) : `${x}`);
 
-function arrHtml([head, ...node]: any[]): string {
+const arrHtml = ([head, ...node]: any[]): string => {
   if (Array.isArray(head)) {
     return arrHtml(head) + node.map(html).join("");
   }
@@ -36,14 +33,11 @@ function arrHtml([head, ...node]: any[]): string {
   return `<${tag}${id ? ` id="${id}"` : ""} ${
     classes.length ? `class="${classes.join(" ")}` : ""
   }${elAttrs}>${node.map(html).join("")}</${tag}>`;
-}
+};
 
 const attr = (a: any): string => (isEvt(a) ? makeEvt(a) : a);
-const attrs = (node: any): string[] =>
+const attrs = (node: any) =>
   Object.keys(node).map(a => ` ${a}="${attr(node[a])}"`);
 
-function makeEvt(handler: DomEvent): string {
-  const key = Math.random();
-  _handlers.set(key, handler);
-  return `doEvent(${key})`;
-}
+const makeEvt = (handler: DomEvent, key = Math.random()) =>
+  _evts.set(key, handler) && `evt(${key})`;
