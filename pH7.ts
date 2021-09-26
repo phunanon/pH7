@@ -18,7 +18,10 @@ const mount = (component: HTMLElement, view: typeof _view, state: any) => {
 
 const update = () => [_evts.clear(), (_mount.innerHTML = html(_view(store())))];
 
-const evt = (key: number) => store({ ...store(), ..._evts.get(key)!(store()) });
+const evt = (event: Event, key: number) => {
+  event.stopPropagation();
+  store({ ...store(), ..._evts.get(key)!(store()) });
+};
 
 const html = (x: any) => (Array.isArray(x) ? arrHtml(x) : `${x}`);
 
@@ -40,4 +43,4 @@ const attrs = (node: any) =>
   Object.keys(node).map(a => ` ${a}="${attr(node[a])}"`);
 
 const makeEvt = (handler: DomEvent, key = Math.random()) =>
-  _evts.set(key, handler) && `evt(${key})`;
+  _evts.set(key, handler) && `evt(event, ${key})`;

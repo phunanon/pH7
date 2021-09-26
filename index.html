@@ -3,11 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="shopping-list.svg" />
     <title>Shopping List</title>
     <script src="pH7.js"></script>
     <script>
       function addItem({ items }) {
-        const newItem = [prompt("Enter item name"), true];
+        const newItem = [`${prompt("Enter item name")}`, true];
         items = [...items, newItem];
         return { items };
       }
@@ -19,26 +20,25 @@
       const remove = ({ items }, v) => ({
         items: items.filter(([value]) => value != v),
       });
+      const itemComp = (a, b) => a[0].localeCompare(b[0]);
       const sort = items => [
-        ...items.filter(([_, on]) => on),
-        ...items.filter(([_, on]) => !on),
+        ...items.filter(([_, on]) => on).sort(itemComp),
+        ...items.filter(([_, on]) => !on).sort(itemComp),
       ];
       const showItems = ([value, on]) => [
         ["btn", { onclick: state => remove(state, value) }, "&#10007;"],
         ["span", { class: on ? "" : "off", onclick: toggle(value) }, value],
         "<hr>",
       ];
-      function DomLoad() {
-        mount(
-          document.body,
-          ({ items }) => [
-            "div",
-            { onclick: addItem },
-            ...(items.length ? sort(items).map(showItems) : ["Tap to add."]),
-          ],
-          { items: [] },
-        );
-      }
+      const build = ({ items }) => {
+        return [
+          "div",
+          { onclick: addItem },
+          ["p", items.filter(([_, on]) => on).length, " remaining"],
+          ...(items.length ? sort(items).map(showItems) : ["Tap to add."]),
+        ];
+      };
+      const DomLoad = () => mount(document.body, build, { items: [] });
     </script>
     <style>
       * {
@@ -49,12 +49,12 @@
         user-select: none;
       }
       div {
-        padding: 8vh 4vw;
+        padding: 10vh 4vw;
       }
       span {
         padding: 0.5rem 0 0.5rem 0.5rem;
         display: inline-block;
-        width: calc(100% - 5vw - 2rem);
+        width: calc(100% - 4vw - 2rem);
       }
       btn {
         width: 2rem;

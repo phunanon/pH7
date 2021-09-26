@@ -11,7 +11,10 @@ const mount = (component, view, state) => {
     store(store() || state);
 };
 const update = () => [_evts.clear(), (_mount.innerHTML = html(_view(store())))];
-const evt = (key) => store({ ...store(), ..._evts.get(key)(store()) });
+const evt = (event, key) => {
+    event.stopPropagation();
+    store({ ...store(), ..._evts.get(key)(store()) });
+};
 const html = (x) => (Array.isArray(x) ? arrHtml(x) : `${x}`);
 const arrHtml = ([head, ...node]) => {
     if (Array.isArray(head)) {
@@ -24,5 +27,5 @@ const arrHtml = ([head, ...node]) => {
 };
 const attr = (a) => (isEvt(a) ? makeEvt(a) : a);
 const attrs = (node) => Object.keys(node).map(a => ` ${a}="${attr(node[a])}"`);
-const makeEvt = (handler, key = Math.random()) => _evts.set(key, handler) && `evt(${key})`;
+const makeEvt = (handler, key = Math.random()) => _evts.set(key, handler) && `evt(event, ${key})`;
 //# sourceMappingURL=pH7.js.map
